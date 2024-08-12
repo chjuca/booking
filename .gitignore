@@ -1,0 +1,14 @@
+/node_modules
+/apps/*/node_modules
+/apps/*/dist
+/apps/*/build
+
+/apps/*/logs
+/apps/*/*.log
+/apps/*/npm-debug.log*
+
+/apps/*/.DS_Store
+/apps/*/coverage
+
+/.turbo
+.env
