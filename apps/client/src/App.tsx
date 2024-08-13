@@ -1,14 +1,15 @@
-function App(){
-  return (
-    <button onClick={async ()=> {
-      const response = await fetch('/api')
-      const data = await response.text()
-      console.log(data)
-    }}>
-      Click me!
-    </button>
-  )
-}
+import React from 'react';
+import { Box, Container } from "@chakra-ui/react";
+import CreateRoomForm from './components/CreateRoomForm';
 
+const App: React.FC = () => {
+    return (
+        <Container>
+            <Box>
+                <CreateRoomForm />
+            </Box>
+        </Container>
+    );
+};
 
-export default App
+export default App;
