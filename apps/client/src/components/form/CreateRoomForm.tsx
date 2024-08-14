@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { Box, FormControl, FormLabel, Input, FormErrorMessage, Button, Textarea, VStack } from '@chakra-ui/react';
-
-interface RoomFormState {
-  roomNumber: string;
-  roomType: string;
-  pricePerNight: string;
-  description: string;
-  name: string;
-  images: FileList | null;
-}
+import { RoomFormState } from '../../types/formTypes';
 
 const CreateRoomForm: React.FC = () => {
   

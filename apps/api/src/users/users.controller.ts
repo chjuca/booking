@@ -21,7 +21,11 @@ export class UsersController {
 
     @Post()
     createUser(@Body() newUser: CreateUserDto): Promise<User>  {
-        return this.userService.createUser(newUser)
+        try{
+            return this.userService.createUser(newUser)
+        } catch (e){
+            return null
+        }
     }
 
 
