@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFiles, UseInterceptors} from '@nestjs/common';
 import { RoomService } from './room.service';
 import { Room } from './room.entity';
 import { CreateRoomDto } from './dto/createRoom.dto';
 import { UpdateRoomDto } from './dto/updateRoom.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('room')
 export class RoomController {
@@ -20,8 +21,10 @@ export class RoomController {
     }
 
     @Post()
-    createUser(@Body() newRoom: CreateRoomDto): Promise<Room>  {
-        return this.roomService.createRoom(newRoom)
+    @UseInterceptors(FilesInterceptor('files'))
+    async createRoom(@Body() newRoom: CreateRoomDto, @UploadedFiles() files: Express.Multer.File[],): Promise<Room>  {
+        const fileLinks = await this.roomService.storeFiles(files);
+        return this.roomService.createRoom(newRoom, fileLinks)
     }
 
 

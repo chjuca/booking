@@ -18,6 +18,9 @@ export class Room {
   @Column({ default: true })
   isAvailable: boolean;
 
+  @Column('simple-array')
+  images: string[];
+
   @OneToMany(() => Booking, booking => booking.room)
   bookings: Booking[];
 }
