@@ -3,15 +3,15 @@ import { IsNotEmpty, IsNumber, IsDate, IsString, IsOptional } from 'class-valida
 export class CreateBookingDto {
     @IsNotEmpty()
     @IsDate()
-    bookingDate: Date;
+    checkInDate: Date;
+
+    @IsNotEmpty()
+    @IsDate()
+    checkOutDate: Date;
 
     @IsOptional()
     @IsNumber()
     depositAmount: number;
-
-    @IsNotEmpty()
-    @IsString()
-    status: string;
 
     @IsNotEmpty()
     @IsNumber()

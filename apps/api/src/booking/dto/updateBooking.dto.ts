@@ -3,7 +3,11 @@ import { IsNumber, IsDate, IsString, IsOptional } from 'class-validator';
 export class UpdateBookingDto {
     @IsOptional()
     @IsDate()
-    bookingDate?: Date;
+    checkInDate?: Date;
+
+    @IsOptional()
+    @IsDate()
+    checkOutDate?: Date;
 
     @IsOptional()
     @IsNumber()

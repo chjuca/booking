@@ -8,12 +8,15 @@ export class Booking {
   id: number;
 
   @Column()
-  bookingDate: Date;
+  checkInDate: Date;
+
+  @Column()
+  checkOutDate: Date;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   depositAmount: number;
 
-  @Column({ default: 'pending' })
+  @Column({ default: 'confirmed' }) // checked_in - checked_out - cancelled - in_progress - completed
   status: string;
 
   @Column({type: 'timestamp', default: () => 'NOW()'})
