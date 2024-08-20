@@ -1,15 +1,22 @@
 export const postData = async (url: string, data: any) => {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-  
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-  
-    return response.json();
+  let options: RequestInit = {
+    method: 'POST',
   };
+
+  if (data instanceof FormData) {
+    options.body = data;
+  } else {
+    options.headers = {
+      'Content-Type': 'application/json',
+    };
+    options.body = JSON.stringify(data);
+  }
+
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  return response.json();
+};

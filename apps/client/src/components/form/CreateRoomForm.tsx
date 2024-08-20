@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, FormControl, FormLabel, Input, FormErrorMessage, Button, Textarea, VStack } from '@chakra-ui/react';
 import { RoomFormState } from '../../types/formTypes';
+import { postData } from '../../services/apiService';
 
 const CreateRoomForm: React.FC = () => {
   
@@ -33,9 +34,28 @@ const CreateRoomForm: React.FC = () => {
 
   const isError = (field: keyof RoomFormState) => formState[field] === '' || (field === 'images' && !formState[field]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formState);
+  
+    const formData = new FormData();
+  
+    (Object.keys(formState) as (keyof RoomFormState)[]).forEach((key) => {
+      if (key === 'images' && formState.images) {
+        Array.from(formState.images).forEach((file) => {
+          formData.append('files', file);
+        });
+      } else {
+        formData.append(key, formState[key] as string);
+      }
+    });
+  
+    try {
+      console.log()
+      const response = await postData('/api/room', formData);
+      console.log('Room created successfully!', response);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
   return (
@@ -110,7 +130,7 @@ const CreateRoomForm: React.FC = () => {
           <Input
             id="file-input"
             type="file"
-            name="images"
+            name="files"
             accept="image/*"
             multiple
             display="none"

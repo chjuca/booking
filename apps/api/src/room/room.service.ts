@@ -4,24 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateRoomDto } from './dto/createRoom.dto';
 import { UpdateRoomDto } from './dto/updateRoom.dto';
-import { S3 } from 'aws-sdk';
-import * as fs from 'fs';
-import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { bucketName, storage } from 'src/storageConfig';
 
 @Injectable()
 export class RoomService {
 
-    private readonly s3: S3;
-
-    constructor(@InjectRepository(Room) private roomRepository: Repository<Room>){
-        this.s3 = new S3({
-            endpoint: 'https://<account-id>.r2.cloudflarestorage.com',
-            accessKeyId: '<your-access-key>',
-            secretAccessKey: '<your-secret-key>',
-            region: 'auto',
-            signatureVersion: 'v4',
-          });
-    }
+    constructor(@InjectRepository(Room) private roomRepository: Repository<Room>){}
 
     createRoom(room: CreateRoomDto, fileLinks: string[] ) {
         const dataRoom = {
@@ -56,22 +45,44 @@ export class RoomService {
 
 
     async storeFiles(files: Express.Multer.File[]): Promise<string[]> {
-        const fileLinks: string[] = [];
+      const bucket = storage.bucket(bucketName);
     
-        for (const file of files) {
-          const params = {
-            Bucket: '<your-bucket-name>',
-            Key: `${Date.now()}-${file.originalname}`,
-            Body: file.buffer,
-            ContentType: file.mimetype,
-            ACL: 'public-read',
-          };
+      try {
+        const uploadPromises = files.map((file) => {
+          const fileName = `${uuidv4()}-${file.originalname}`;
+          const fileUpload = bucket.file(fileName);
     
-          const uploadResult = await this.s3.upload(params).promise();
-          fileLinks.push(uploadResult.Location);
-        }
+          return new Promise<string>((resolve, reject) => {
+            const stream = fileUpload.createWriteStream({
+              metadata: {
+                contentType: file.mimetype,
+              },
+              resumable: false,
+            });
     
-        return fileLinks;
+            stream.on('error', (err) => {
+              console.error('Upload error:', err);
+              reject(new Error('Failed to upload file.'));
+            });
+    
+            stream.on('finish', async () => {
+              try {
+                await fileUpload.makePublic();
+                const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+                resolve(publicUrl);
+              } catch (err) {
+                reject(err);
+              }
+            });
+    
+            stream.end(file.buffer);
+          });
+        });
+    
+        return await Promise.all(uploadPromises);
+      } catch (e) {
+        console.error('Error in storeFiles function:', e);
+        return [];
+      }
     }
-
 }
