@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Box, FormControl, FormLabel, Input, FormErrorMessage, Button, Textarea, VStack } from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, Input, FormErrorMessage, Button, Textarea, VStack, useDisclosure } from '@chakra-ui/react';
 import { RoomFormState } from '../../types/formTypes';
 import { postData } from '../../services/apiService';
+import CustomModal from './modal/customModal';
 
 const CreateRoomForm: React.FC = () => {
   
@@ -11,8 +12,12 @@ const CreateRoomForm: React.FC = () => {
     pricePerNight: '',
     description: '',
     name: '',
-    images: null,
+    files: null,
   });
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [modalMessage, setModalMessage] = useState('');
+  const [error, setError] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -32,7 +37,7 @@ const CreateRoomForm: React.FC = () => {
     }
   };
 
-  const isError = (field: keyof RoomFormState) => formState[field] === '' || (field === 'images' && !formState[field]);
+  const isError = (field: keyof RoomFormState) => formState[field] === '' || (field === 'files' && !formState[field]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,8 +45,8 @@ const CreateRoomForm: React.FC = () => {
     const formData = new FormData();
   
     (Object.keys(formState) as (keyof RoomFormState)[]).forEach((key) => {
-      if (key === 'images' && formState.images) {
-        Array.from(formState.images).forEach((file) => {
+      if (key === 'files' && formState.files) {
+        Array.from(formState.files).forEach((file) => {
           formData.append('files', file);
         });
       } else {
@@ -50,15 +55,19 @@ const CreateRoomForm: React.FC = () => {
     });
   
     try {
-      console.log()
-      const response = await postData('/api/room', formData);
-      console.log('Room created successfully!', response);
+      await postData('/api/room', formData);
+      setModalMessage('Room submitted successfully!');
+      setError(false);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      setModalMessage('Failed to submit room. Please try again.');
+      setError(true);
+    } finally {
+      onOpen();
     }
   };
 
   return (
+    <>
     <Box as="form" onSubmit={handleSubmit}>
       <FormControl isInvalid={isError('name')}>
         <FormLabel>Name:</FormLabel>
@@ -114,7 +123,7 @@ const CreateRoomForm: React.FC = () => {
         {isError('pricePerNight') && <FormErrorMessage>Price Per Night is required.</FormErrorMessage>}
       </FormControl>
 
-      <FormControl mt={4} isInvalid={isError('images')}>
+      <FormControl mt={4} isInvalid={isError('files')}>
         <FormLabel>Images:</FormLabel>
         <VStack align="start">
           <Button
@@ -136,7 +145,7 @@ const CreateRoomForm: React.FC = () => {
             display="none"
             onChange={handleInputChange}
           />
-          {isError('images') && <FormErrorMessage>At least one image is required.</FormErrorMessage>}
+          {isError('files') && <FormErrorMessage>At least one image is required.</FormErrorMessage>}
         </VStack>
       </FormControl>
 
@@ -144,6 +153,13 @@ const CreateRoomForm: React.FC = () => {
         Submit
       </Button>
     </Box>
+    <CustomModal
+        isOpen={isOpen}
+        onClose={onClose}
+        message={modalMessage}
+        error={error}
+      />
+    </>
   );
 };
 

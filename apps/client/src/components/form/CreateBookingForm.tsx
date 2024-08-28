@@ -36,7 +36,7 @@ const CreateBookingForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await postData('/api/bookings', formState);
+      await postData('/api/bookings', formState);
       setModalMessage('Booking submitted successfully!');
       setError(false);
     } catch (error) {

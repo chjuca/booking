@@ -12,6 +12,6 @@ export interface RoomFormState {
     pricePerNight: string;
     description: string;
     name: string;
-    images: FileList | null;
+    files: FileList | null;
   }
   
