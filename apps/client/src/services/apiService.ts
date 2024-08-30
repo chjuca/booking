@@ -1,32 +1,21 @@
+import axios from 'axios';
+
 export const postData = async (url: string, data: any) => {
-  let options: RequestInit = {
-    method: 'POST',
-  };
-
-  if (data instanceof FormData) {
-    options.body = data;
-  } else {
-    options.headers = {
-      'Content-Type': 'application/json',
-    };
-    options.body = JSON.stringify(data);
+  try {
+    const response = await axios.post(url, data, {
+      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Network response was not ok');
   }
-
-  const response = await fetch(url, options);
-
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-
-  return response.json();
 };
 
 export const getData = async (url: string): Promise<any> => {
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Network response was not ok');
   }
-
-  return response.json();
 };

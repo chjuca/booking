@@ -1,15 +1,20 @@
 import React from 'react';
-import { Box} from "@chakra-ui/react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LoginForm from './components/form/LoginForm';
 import RoomList from './components/list/RoomList';
-// import CreateBookingForm from './components/form/CreateBookingForm';
-// import CreateRoomForm from './components/form/CreateRoomForm';
-// import CreateUserForm from './components/form/CreateUserForm';
+import PrivateRoute from './components/PrivateRoute';
 
 const App: React.FC = () => {
     return (
-        <Box>
-            <RoomList />
-        </Box>
+    <Router>
+        <Routes>
+            <Route path="/login" element={<LoginForm />} />
+            <Route element={<PrivateRoute/>}>
+            <Route path="/" element={<RoomList />} />
+            </Route>
+        </Routes>
+    </Router>
+
     );
 };
 
