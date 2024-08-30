@@ -6,13 +6,12 @@ import { join } from 'path';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BookingController } from './booking/booking.controller';
-import { BookingService } from './booking/booking.service';
 import { RoomController } from './room/room.controller';
 import { RoomModule } from './room/room.module';
-import { UsersService } from './users/users.service';
-import { RoomService } from './room/room.service';
 import { UsersController } from './users/users.controller';
 import { BookingModule } from './booking/booking.module';
+import { AuthController } from './auth/auth.controller';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -31,9 +30,10 @@ import { BookingModule } from './booking/booking.module';
     }),
     UsersModule,
     RoomModule,
-    BookingModule
+    BookingModule,
+    AuthModule
   ],
-  controllers: [AppController, BookingController, RoomController, UsersController],
+  controllers: [AppController, BookingController, RoomController, UsersController, AuthController],
   providers: [AppService],
 })
 export class AppModule {}

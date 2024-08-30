@@ -4,19 +4,23 @@ import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
     
     constructor(@InjectRepository(User) private userRepository: Repository<User>) { }
 
-    createUser(user: CreateUserDto) {
-        try{
-            const newUser = this.userRepository.create(user)
-            return this.userRepository.save(newUser)
-        } catch(error){
-            throw new InternalServerErrorException('Failed to create user');
-        }
+    async createUser(user: CreateUserDto) {
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(user.password, salt);
+    
+        const newUser = this.userRepository.create({
+          ...user,
+          password: hashedPassword,
+        });
+        return this.userRepository.save(newUser);
+    
     }
 
     getUsers() {
@@ -26,6 +30,12 @@ export class UsersService {
     getUserById(id: number) {
         return this.userRepository.findOne({
             where: {id}
+        })
+    }
+
+    getUserByUserName(userName: string) {
+        return this.userRepository.findOne({
+            where: {userName}
         })
     }
 
