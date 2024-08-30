@@ -16,12 +16,14 @@ interface CreateBookingFormProps {
   room: Room;
 }
 
+const userId = localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : 0
+
 const CreateBookingForm: React.FC<CreateBookingFormProps> = ({room} ) => {
   const [formState, setFormState] = useState<BookingFormState>({
     checkInDate: '',
     checkOutDate: '',
     depositAmount: 0,
-    userId: 0,
+    userId: userId,
     roomId: room.id,
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -107,17 +109,6 @@ const CreateBookingForm: React.FC<CreateBookingFormProps> = ({room} ) => {
             value={formState.depositAmount?.toString() || ''}
             readOnly
           />
-        </FormControl>
-
-        <FormControl mt={4} isInvalid={isError('userId')}>
-          <FormLabel>User ID:</FormLabel>
-          <Input
-            type="number"
-            name="userId"
-            value={formState.userId.toString()}
-            onChange={handleInputChange}
-          />
-          {isError('userId') && <FormErrorMessage>User ID is required.</FormErrorMessage>}
         </FormControl>
 
         <Button mt={4} colorScheme="teal" type="submit">
