@@ -6,11 +6,21 @@ import {
   Flex,
   Grid,
   Spinner,
-  Center
+  Center,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure
 } from '@chakra-ui/react';
 
 import { getData } from '../../services/apiService';
 import CustomCarousel from '../utils/CustomCarousel';
+import CreateBookingForm from '../form/CreateBookingForm';
 
 export interface Room {
     id: number;
@@ -23,8 +33,11 @@ export interface Room {
 
 const RoomCard = ({ room }: {room: Room}) => {
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
-    <Box borderWidth="1px" borderRadius="lg" overflow="hidden" width="100%">
+    <>
+    <Box borderWidth="1px" borderRadius="lg" onClick={onOpen} cursor="pointer" overflow="hidden" width="100%">
 
       <CustomCarousel images={room.images}/>
 
@@ -47,6 +60,18 @@ const RoomCard = ({ room }: {room: Room}) => {
         </Text>
       </Box>
     </Box>
+
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Book Room {room.roomNumber}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <CreateBookingForm room={room} />
+          </ModalBody>
+      </ModalContent>
+    </Modal>
+    </>
   );
 };
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, FormControl, FormLabel, Input, FormErrorMessage, Button, useDisclosure } from '@chakra-ui/react';
 import { postData } from '../../services/apiService';
 import CustomModal from './modal/customModal';
+import { Room } from '../list/RoomList';
 
 interface BookingFormState {
   checkInDate: string;
@@ -11,13 +12,17 @@ interface BookingFormState {
   roomId: number;
 }
 
-const CreateBookingForm: React.FC = () => {
+interface CreateBookingFormProps {
+  room: Room;
+}
+
+const CreateBookingForm: React.FC<CreateBookingFormProps> = ({room} ) => {
   const [formState, setFormState] = useState<BookingFormState>({
     checkInDate: '',
     checkOutDate: '',
-    depositAmount: undefined,
+    depositAmount: 0,
     userId: 0,
-    roomId: 0,
+    roomId: room.id,
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modalMessage, setModalMessage] = useState('');
@@ -31,12 +36,34 @@ const CreateBookingForm: React.FC = () => {
     }));
   };
 
+  useEffect(() => {
+    if (formState.checkInDate && formState.checkOutDate) {
+      const checkInDate = new Date(formState.checkInDate);
+      const checkOutDate = new Date(formState.checkOutDate);
+      const differenceInTime = checkOutDate.getTime() - checkInDate.getTime();
+      const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+
+      if (differenceInDays > 0) {
+        const calculatedDepositAmount = differenceInDays * room.pricePerNight;
+        setFormState((prevState) => ({
+          ...prevState,
+          depositAmount: calculatedDepositAmount,
+        }));
+      } else {
+        setFormState((prevState) => ({
+          ...prevState,
+          depositAmount: undefined,
+        }));
+      }
+    }
+  }, [formState.checkInDate, formState.checkOutDate, room.pricePerNight]);
+
   const isError = (field: keyof BookingFormState) => formState[field] === '';
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await postData('/api/bookings', formState);
+      await postData('/api/booking', formState);
       setModalMessage('Booking submitted successfully!');
       setError(false);
     } catch (error) {
@@ -49,7 +76,7 @@ const CreateBookingForm: React.FC = () => {
 
   return (
     <>
-      <Box as="form" onSubmit={handleSubmit}>
+      <Box p={5} as="form" onSubmit={handleSubmit}>
         <FormControl isInvalid={isError('checkInDate')}>
           <FormLabel>Check-in Date:</FormLabel>
           <Input
@@ -78,7 +105,7 @@ const CreateBookingForm: React.FC = () => {
             type="number"
             name="depositAmount"
             value={formState.depositAmount?.toString() || ''}
-            onChange={handleInputChange}
+            readOnly
           />
         </FormControl>
 
@@ -93,20 +120,10 @@ const CreateBookingForm: React.FC = () => {
           {isError('userId') && <FormErrorMessage>User ID is required.</FormErrorMessage>}
         </FormControl>
 
-        <FormControl mt={4} isInvalid={isError('roomId')}>
-          <FormLabel>Room ID:</FormLabel>
-          <Input
-            type="number"
-            name="roomId"
-            value={formState.roomId.toString()}
-            onChange={handleInputChange}
-          />
-          {isError('roomId') && <FormErrorMessage>Room ID is required.</FormErrorMessage>}
-        </FormControl>
-
         <Button mt={4} colorScheme="teal" type="submit">
           Submit
         </Button>
+
       </Box>
       <CustomModal
         isOpen={isOpen}
