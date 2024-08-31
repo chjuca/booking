@@ -1,16 +1,19 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Request} from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { Booking } from './booking.entity';
 import { CreateBookingDto } from './dto/createBooking.dto';
 import { UpdateBookingDto } from './dto/updateBooking.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('booking')
 export class BookingController {
     constructor(private  bookingService: BookingService){ }
 
-    @Get(':id')
-    getBooking(@Param('id', ParseIntPipe) id: number): Promise<Booking> {
-        return this.bookingService.getBookingById(id)
+    @UseGuards(JwtAuthGuard)
+    @Get()
+    getBookings(@Request() req): Promise<Booking[]> {
+        const userId = req.user?.userId || 0;
+        return this.bookingService.getBookingByUser(userId)
     }
 
     @Post()

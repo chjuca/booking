@@ -13,7 +13,9 @@ export const postData = async (url: string, data: any) => {
 
 export const getData = async (url: string): Promise<any> => {
   try {
-    const response = await axios.get(url);
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(url, { headers });
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Network response was not ok');
