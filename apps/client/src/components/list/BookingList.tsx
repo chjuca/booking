@@ -7,43 +7,68 @@ import {
   Grid,
   Spinner,
   Center,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  useDisclosure
+  VStack
 } from '@chakra-ui/react';
 
 import { getData } from '../../services/apiService';
-import CustomCarousel from '../utils/CustomCarousel';
-import CreateBookingForm from '../form/CreateBookingForm';
 import { Room } from './RoomList';
+import CustomCarousel from '../utils/CustomCarousel';
 
 export interface Booking {
   id: number
-  checkInDate: Date
-  checkOutDate: Date
+  checkInDate: string
+  checkOutDate: string
   depositAmount: number
   status: string
-  createdAt: Date
+  createdAt: string
   room: Room
 }
 
-const BookingCard = ({ booking }: {booking: Booking}) => {
+const BookingCard = ({ booking }: { booking: Booking }) => {
+
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
   return (
-    <>
-      <Box borderWidth="1px" borderRadius="lg" overflow="hidden" width="100%">
+    <Box borderWidth="1px" borderRadius="lg" overflow="hidden" width="100%" p="4" boxShadow="md">
+      <VStack align="start" spacing={4}>
+        <Flex justify="space-between" width="100%">
+          <Badge colorScheme={booking.status === 'confirmed' ? 'green' : 'red'}>
+            {booking.status}
+          </Badge>
+        </Flex>
 
-        <Box p="6">
-          <Text mt="2" fontWeight="semibold" color="gray.700">
-            ${booking.depositAmount}
+        <Text fontWeight="semibold" color="gray.500">
+          Check-in Date: {formatDate(booking.checkInDate)}
+        </Text>
+        <Text fontWeight="semibold" color="gray.500">
+          Check-out Date: {formatDate(booking.checkOutDate)}
+        </Text>
+        <Text fontWeight="semibold" color="gray.500">
+          Created At: {formatDate(booking.createdAt)}
+        </Text>
+
+        <Box borderWidth="1px" borderRadius="lg" overflow="hidden" width="100%">
+          <CustomCarousel images={booking.room.images} />
+          <Box p="6">
+            <Flex mt="1" justifyContent="space-between" alignItems="center">
+              <Text fontWeight="bold" fontSize="xl">
+                Room {booking.room.roomNumber}
+              </Text>
+              <Text color="gray.500">
+                {booking.room.roomType}
+              </Text>
+            </Flex>
+          </Box>
+        </Box>
+
+        <Box borderTopWidth="1px" borderColor="white.200" width="100%" pt="4" mt="4">
+          <Text fontSize="xl" fontWeight="bold" color="white.800">
+            Deposit Amount: ${booking.depositAmount}
           </Text>
         </Box>
-      </Box>
-    </>
+
+      </VStack>
+    </Box>
   );
 };
 
@@ -56,7 +81,6 @@ const BookingList = () => {
     const fetchBookings = async () => {
       try {
         const bookings = await getData('/api/booking');
-        console.log(bookings)
         if (!bookings) {
           throw new Error('Error fetching bookings');
         }

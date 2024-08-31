@@ -70,7 +70,7 @@ const CustomCarousel: React.FC<{ images: string[] }> = ({ images }) => {
         {images.map((url: string, index: number) => (
           <Box
             key={index}
-            height={'md'}
+            height={'sm'}
             position="relative"
             backgroundPosition="center"
             backgroundRepeat="no-repeat"

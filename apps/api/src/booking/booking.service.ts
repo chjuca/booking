@@ -40,7 +40,8 @@ export class BookingService {
 
     getBookingByUser(idUser: number) {
         return this.bookingRepository.find({
-            where: { user: {id: idUser}}
+            where: { user: {id: idUser}},
+            relations: ['room'],
         })
     }
 
