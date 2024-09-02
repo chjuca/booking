@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Box, FormControl, FormLabel, Input, Button, Text, useToast } from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, Input, Button, Text, useToast, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import CreateUserForm from './CreateUserForm';
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -30,7 +31,10 @@ const LoginForm: React.FC = () => {
     }
   };
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
+    <>
     <Box maxW="md" mx="auto" mt={10} p={6} borderWidth={1} borderRadius="md" boxShadow="md">
       <form onSubmit={handleSubmit}>
         <FormControl id="username" mb={4} isRequired>
@@ -59,11 +63,27 @@ const LoginForm: React.FC = () => {
           </Text>
         )}
 
-        <Button type="submit" colorScheme="teal" width="full">
-          Login
-        </Button>
+      <Button type="submit" colorScheme="teal" width="full" my={2}>
+        Login
+      </Button>
+
+      <Button onClick={onOpen} bg="gray.700" color="white" _hover={{ bg: "gray.600" }} width="full" my={2}>
+        Register
+      </Button>
       </form>
     </Box>
+
+
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalBody>
+            <CreateUserForm/>
+          </ModalBody>
+      </ModalContent>
+    </Modal>
+    </>
   );
 };
 
