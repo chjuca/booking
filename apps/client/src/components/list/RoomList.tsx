@@ -13,12 +13,13 @@ import {
   ModalHeader,
   ModalCloseButton,
   ModalBody,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 
 import { getData } from '../../services/apiService';
 import CustomCarousel from '../utils/CustomCarousel';
 import CreateBookingForm from '../form/CreateBookingForm';
+import DateSelector from '../utils/DateSelector';
 
 export interface Room {
     id: number;
@@ -78,48 +79,64 @@ const RoomList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [checkInDate, setCheckInDate] = useState('');
+  const [checkOutDate, setCheckOutDate] = useState('');
+
+  const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCheckInDate(e.target.value);
+  const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCheckOutDate(e.target.value);
+
   useEffect(() => {
     const fetchRooms = async () => {
-      try {
-        const rooms = await getData('/api/room');
-        if (!rooms) {
-          throw new Error('Error fetching rooms');
+      if (checkInDate && checkOutDate) {
+        try {
+          const url = `/api/room?checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`;
+          const rooms = await getData(url);
+          if (!rooms) {
+            throw new Error('Error fetching rooms');
+          }
+          setRooms(rooms);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
         }
-        setRooms(rooms);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchRooms();
-  }, []);
+  }, [checkInDate, checkOutDate]);
 
-  if (loading) {
-    return (
+  return (
+    <>
+    <DateSelector
+      checkInDate={checkInDate}
+      checkOutDate={checkOutDate}
+      onCheckInChange={(e) => setCheckInDate(e.target.value)}
+      onCheckOutChange={(e) => setCheckOutDate(e.target.value)}
+    />
+    
+    {loading && (
       <Center h="100vh">
         <Spinner size="xl" />
       </Center>
-    );
-  }
-
-  if (error) {
-    return (
+    )}
+    
+    {error && (
       <Center h="100vh">
         <Text fontSize="xl" color="red.500">
           {error}
         </Text>
       </Center>
-    );
-  }
-
-  return (
-    <Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={6} p={4}>
-      {rooms.map((room: Room) => (
-        <RoomCard key={room.id} room={room} />
-      ))}
-    </Grid>
+    )}
+    
+    {!loading && !error && (
+      <Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={6} p={4}>
+        {rooms.map((room: Room) => (
+          <RoomCard key={room.id} room={room} />
+        ))}
+      </Grid>
+    )}
+  </>
   );
 };
 

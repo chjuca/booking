@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFiles, UseInterceptors} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseInterceptors} from '@nestjs/common';
 import { RoomService } from './room.service';
 import { Room } from './room.entity';
 import { CreateRoomDto } from './dto/createRoom.dto';
@@ -11,8 +11,13 @@ export class RoomController {
     constructor(private  roomService: RoomService){ }
 
     @Get()
-    getRoomsAvailable(): Promise<Room[]> {
-        return this.roomService.getRoomsAvailable()
+    getRoomsAvailable(
+        @Query('checkInDate') checkInDateStr: string,
+        @Query('checkOutDate') checkOutDateStr: string
+    ): Promise<Room[]> {
+        const checkInDate = new Date(checkInDateStr);
+        const checkOutDate = new Date(checkOutDateStr);
+        return this.roomService.getRoomsAvailable(checkInDate, checkOutDate)
     }
 
     @Get(':id')

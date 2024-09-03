@@ -21,14 +21,19 @@ export class RoomService {
         return this.roomRepository.save(newRoom)
     }
 
-    getRoomsAvailable() {
-        return this.roomRepository.find({
-            where: {
-                isAvailable: true
-            }
-        })
+    getRoomsAvailable(checkInDate: Date, checkOutDate: Date) {
+      return this.roomRepository.createQueryBuilder('room')
+        .leftJoinAndSelect('room.bookings', 'booking')
+        .where('room.isAvailable = :isAvailable', { isAvailable: true })
+        .andWhere(
+          '(booking.id IS NULL OR ' +
+          'booking.status = :status OR ' +
+          '(:checkInDate >= booking.checkOutDate OR :checkOutDate <= booking.checkInDate))',
+          { isAvailable: true, status: 'cancelled', checkInDate, checkOutDate }
+        )
+        .getMany();
     }
-
+    
     getRoomById(id: number) {
         return this.roomRepository.findOne({
             where: {id}
